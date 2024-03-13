@@ -7,7 +7,7 @@ Loop Kernels" and http://pluto-compiler.sourceforge.net.
 
 This package includes both the tool pluto, libpluto and they are enriched with our methodology. The 'pluto' tool
 is a source-to-source transfomer meant to be run via the polycc script.
-libpluto provides a thread-safe library interface.
+libpluto provides a thread-safe library interface. Currently, we do not support any other optimizations apart from Register Blocking.
 
 **LICENSE**
 
@@ -141,6 +141,4 @@ See examples/MMM for this steps:
 ```
   The transformation is also printed out some information and provide the  intermediate files. By usning pluto 
   we unroll the i loop (outer loop) with factor 14. The new optmised file is the 'mvm.pluto.c'.
-
-Note: Currently, we do not support any other optimizations apart from Register Blocking.
 
