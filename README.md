@@ -1,4 +1,4 @@
-*Register Blocking Source-to-Source library*
+**Register Blocking Source-to-Source library**
 
 **OVERVIEW**
 
@@ -14,7 +14,7 @@ libpluto provides a thread-safe library interface.
 Pluto and libpluto are available under the MIT LICENSE. Please see the file
 LICENSE in the top-level directory for more details.
 
-INSTALLING Register Blocking library
+**INSTALLING Register Blocking library**
   - Use a simple cmake prosidure to intall it:
 ```
   $ cd ./rbalib/build
@@ -54,7 +54,8 @@ pet's pre-requisites.
 
 
 **BUILDING PLUTO**
-You can use the ***intall_tool.sh*** script that contain some instuctions or use the Pluto recommended procedure: 
+
+You can use the "intall_tool.sh" script that contain some instuctions or use the Pluto recommended procedure: 
 
 Stable release
 
@@ -86,9 +87,9 @@ already installed isl. By default, the version of isl bundled with Pluto will be
 used.
 
 
-TRYING A NEW EXAMPLE
+**TRYING A NEW EXAMPLE**
 
-Run our methodoloy
+***Run our methodoloy***
 
 First, we need to identify the most optimal Register Blocking factors of the provided kernel. Given a kernel, we need to write the wrapper that will describe our kernel. To make things easier, a straightforward example of a matrix-vector multiplication kernel. Given the this MVM kernel:
 ```
