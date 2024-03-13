@@ -55,7 +55,7 @@ pet's pre-requisites.
 
 **BUILDING PLUTO**
 
-You can use the "intall_tool.sh" script that contain some instuctions or use the Pluto recommended procedure: 
+We advice you to use the "intall_tool.sh" script that contain some instuctions (and comments on errors and how to avoid them) or use the Pluto recommended procedure: 
 
 Stable release
 

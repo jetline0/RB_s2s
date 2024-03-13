@@ -1,6 +1,6 @@
 #!/bin/bash
 
-../../tool/pluto mVm.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[14,1]
+../../tool/pluto mvm.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[14,1]
 
 ../../inscop mmm.c mmm.pluto.c mmm.pluto.c
 
