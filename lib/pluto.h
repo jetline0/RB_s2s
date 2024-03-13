@@ -358,6 +358,8 @@ struct plutoProg {
    * stmt->trans->nrows */
   int num_hyperplanes;
 
+  int num_of_for_loops;
+
   /* Data dependence graph of the program */
   Graph *ddg;
 
@@ -642,6 +644,8 @@ int is_loop_dominated(Ploop *loop1, Ploop *loop2, const PlutoProg *prog);
 Ploop **pluto_get_parallel_loops(const PlutoProg *prog, unsigned *nploops);
 Ploop **pluto_get_all_loops(const PlutoProg *prog, unsigned *num);
 Ploop **pluto_get_unroll_jam_loops(const PlutoProg *prog,
+                                   unsigned *num_ujloops);
+Ploop **all_unroll_jam_loops(const PlutoProg *prog, int *ufactors,
                                    unsigned *num_ujloops);
 Ploop **pluto_get_dom_parallel_loops(const PlutoProg *prog, unsigned *nploops);
 Band **pluto_get_dom_parallel_bands(PlutoProg *prog, unsigned *nbands,

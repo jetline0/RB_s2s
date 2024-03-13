@@ -95,6 +95,9 @@ struct plutoOptions {
   /* unroll/jam factor */
   int ufactor;
 
+  /* unroll/jam factors */
+  int *ufactors;
+
   /* Enable or disable post-transformations to make code amenable to
    * vectorization (default - enabled) */
   int prevector;
@@ -305,6 +308,10 @@ void pluto_remapping_free(Remapping remapping);
 
 /// Free the string stored in schedules_str_buffer_ptr.
 void pluto_schedules_strbuf_free(char *schedules_str_buffer);
+
+// Read the Register Blocking factors for each of the for loop.
+// Correct format is --ufactors==[x1,x2,...,xn] where n is the number of for loops 
+void load_factors(char* optstring, int *ufactors);
 
 #if defined(__cplusplus)
 }

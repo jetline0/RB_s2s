@@ -292,8 +292,14 @@ int pluto_gen_cloog_code(const PlutoProg *prog, int cloogf, int cloogl,
    * marked parallel as there will be very few iterations in it. Properties of
    * the inner loops that are marked PARALLEL or PARALLEL_VEC will be retained
    * during unroll jamming. */
+  // if (options->unrolljam) {
+  //   pluto_mark_unroll_jam(root, prog, cloogOptions, options->ufactor); 
+  //   clast_unroll_jam(root);
+  // }
+  
+  /*Here we perform multiple Unroll jump that is provided by the developer*/
   if (options->unrolljam) {
-    pluto_mark_unroll_jam(root, prog, cloogOptions, options->ufactor);
+    mark_multy_unrolls_jam(root, prog, cloogOptions, options->ufactors); 
     clast_unroll_jam(root);
   }
   clast_pprint(outfp, root, 0, cloogOptions);

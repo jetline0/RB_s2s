@@ -1,0 +1,22 @@
+3
+2
+in_FP byixjd 0
+4
+filter_FP mijd 0
+4
+out byxm 1
+7
+bmyxijd 20 128 60 60 3 3 256
+32
+m
+128
+
+// Conv2D kernel
+//for (b = 0; b < 20; b++)
+//    for (m = 0; m < 128; m++)
+//        for (y = 0; y < 52; y++)
+//            for (x = 0; x < 52; x++)
+//                for (i = 0; i < 3; i++)
+//                    for (j = 0; j < 3; j++)
+//                        for (d = 0; d < 256; d++)
+//                            out[b][y][x][m] += in_FP[b][y + i][x + j][d] * filter_FP[m][i][j][d];

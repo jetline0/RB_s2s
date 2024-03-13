@@ -1,0 +1,12 @@
+3
+2
+in_FP byixjd 1
+4
+filter_FP mijd 0
+4
+out byxm 0
+7
+bmyxijd 20 128 60 60 3 3 256
+16
+d
+32

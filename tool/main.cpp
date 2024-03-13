@@ -150,6 +150,8 @@ void usage_message(void) {
                   "by default)\n");
   fprintf(stdout, "       --ufactor=<factor>        Unroll and jam factor "
                   "(default is 8)\n");
+  fprintf(stdout, "       --ufactors=[x1,x2,..,xn]  Unroll and jam factors "
+                  "(default is 8)\n");
   fprintf(stdout, "       --forceparallel=<bitvec>  6 bit-vector of depths "
                   "(1-indexed) to force parallel (0th bit represents depth "
                   "1)\n");
@@ -189,6 +191,9 @@ int main(int argc, char *argv[]) {
 
   int option_index = 0;
   int nolastwriter = 0;
+  int arr_size = 0;
+
+
 
   PlutoContext *context = pluto_context_alloc();
   PlutoOptions *options = context->options;
@@ -223,6 +228,7 @@ int main(int argc, char *argv[]) {
     {"unrolljam", no_argument, &options->unrolljam, 1},
     {"nounrolljam", no_argument, &options->unrolljam, 0},
     {"bee", no_argument, &options->bee, 1},
+    {"ufactors", required_argument, 0, 'u'},
     {"ufactor", required_argument, 0, 'u'},
     {"prevector", no_argument, &options->prevector, 1},
     {"noprevector", no_argument, &options->prevector, 0},
@@ -351,7 +357,27 @@ int main(int argc, char *argv[]) {
     case 's':
       break;
     case 'u':
-      options->ufactor = atoi(optarg);
+      // load Register Blocking factors from RB tool
+      if (optarg[0] == '[' && optarg[strlen(optarg) - 1] == ']') {
+        char *token = strtok(optarg + 1, ",");
+        while (token != NULL) {
+          int value = atoi(token);
+          arr_size++;
+          if (arr_size == 1){
+            options->ufactors = (int *)malloc(arr_size * sizeof(int));
+          }
+          else{
+            options->ufactors = (int *)realloc(options->ufactors, arr_size * sizeof(int));
+          }
+            options->ufactors[arr_size - 1] = value;
+            token = strtok(NULL, ",");
+
+        }
+      } else {
+        printf("Invalid input format on --ufactors. Please use [x1,x2,...,xn].\n");
+        return 2;
+      }
+      options->ufactor = options->ufactors[0];
       break;
     case 'v':
       printf(
@@ -649,6 +675,13 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
     fprintf(stdout, "[pluto] Maximum domain dimensionality: %d\n", prog->nvar);
     fprintf(stdout, "[pluto] Number of parameters: %d\n", prog->npar);
   }
+  prog->num_of_for_loops = dim_sum;
+
+  if (dim_sum != arr_size){
+    fprintf(stdout, "\nERROR: Number of for loops not equal with to ufactors vector (--ufactors): %d vs %d\n", dim_sum,arr_size);
+    return 0;
+  }
+    
 
   if (options->iss) {
     pluto_iss_dep(prog);

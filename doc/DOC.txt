@@ -103,9 +103,11 @@ COMMAND-LINE OPTIONS
     --[no]unrolljam
     Automatically identify and unroll-jam loops. Enabled by default.
 
-    --ufactor=<n>
-    Unroll or unroll-jam factor (default is 8). Note that if two loops
-    are unroll-jammed by factor n, you will get an nxn body.
+    --ufactor=<factors>
+    Unroll or unroll-jam factors (default is an array of ones for each loop e.g., [1,1,1...]). To find the best factors please 
+    run the "rbalib" tool. To do that go to the RB_s2s/rbalib and install it using simple cmake commands (check the readme.txt for more info).
+    After running the "rbalib" tool for your kernel, a vector of the needed Unroll Factors will be popped in stdio (e.g. [2,3,1]). Use this vector to update ufactor like 
+    --ufactor=[2,3,1].
 
     --[no]prevector
     Perform post-transformations to make the code amenable to 

@@ -625,3 +625,24 @@ void pluto_remapping_free(Remapping remapping) {
 void pluto_schedules_strbuf_free(char *schedules_str_buffer) {
   free(schedules_str_buffer);
 }
+
+void load_factors(char* optstring, int *ufactors){
+    int arr_size = 0;
+
+    // Parse the input string in the format [x1,x2,...,xn]
+    if (optstring[0] == '[' && optstring[strlen(optstring) - 1] == ']') {
+        char *token = strtok(optstring + 1, ",");
+        while (token != NULL) {
+            int value = atoi(token);
+            arr_size++;
+            if (arr_size == 1)
+              ufactors = (int *)malloc(arr_size * sizeof(int));
+            else
+              ufactors = (int *)realloc(ufactors, arr_size * sizeof(int));
+            ufactors[arr_size - 1] = value;
+            token = strtok(NULL, ",");
+        }
+    } else {
+        printf("Invalid input format. Please use [x1,x2,...,xn].\n");
+    }
+}

@@ -865,6 +865,8 @@ PlutoOptions *pluto_options_alloc() {
   /* Unroll/jam factor */
   options->ufactor = 8;
 
+  options->ufactors;
+
   /* Ignore input deps */
   options->rar = 0;
 
@@ -2500,3 +2502,5 @@ unsigned get_num_invariant_accesses_in_stmts(Stmt **stmts, unsigned nstmts,
   free(accesses);
   return num_invariant_access;
 }
+
+

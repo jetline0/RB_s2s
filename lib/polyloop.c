@@ -605,6 +605,39 @@ Ploop **pluto_get_unroll_jam_loops(const PlutoProg *prog,
   return ujloops;
 }
 
+Ploop **all_unroll_jam_loops(const PlutoProg *prog, int *ufactors,
+                                   unsigned *num_ujloops) {
+  unsigned num_ibands;
+  Band **ibands = pluto_get_innermost_permutable_bands(prog, 1, &num_ibands);
+  unsigned num = 0;
+  Ploop **ujloops = NULL;
+  unsigned nloops = 0;
+  int num_tile_loops=prog->num_hyperplanes - prog->num_of_for_loops;
+  for (unsigned j = 0; j < num_ibands; j++) {
+    Ploop *loop = ibands[j]->loop;
+    Ploop **loops = pluto_get_loops_under(loop->stmts, loop->nstmts,
+                                          loop->depth, prog, &num);
+    for (int i = 0; i < num; i++) {
+      /* Do not unroll jam a tile space loop. */
+      if (is_tile_space_loop(loops[i], prog))
+        continue;
+      /* Do not unroll jam the innermost loop. */
+      if (pluto_loop_is_innermost(loops[i], prog))
+        continue;
+      /* Do not unroll jam if unroll jamming is not profitable. Refer function
+       * defintion for the cost function. */
+      if (ufactors[num - 1 - i - num_tile_loops] == 1) 
+        continue;
+      ujloops = (Ploop **)realloc(ujloops, (nloops + 1) * sizeof(Ploop *));
+      ujloops[nloops++] = pluto_loop_dup(loops[i]);
+    }
+    pluto_loops_free(loops, num);
+  }
+  *num_ujloops = nloops;
+  pluto_bands_free(ibands, num_ibands);
+  return ujloops;
+}
+
 /* Get all parallel loops */
 Ploop **pluto_get_parallel_loops(const PlutoProg *prog, unsigned *nploops) {
   Ploop **loops, **ploops;
