@@ -1,6 +1,6 @@
-Register Blocking Source-to-Source library
+*Register Blocking Source-to-Source library*
 
-OVERVIEW
+**OVERVIEW**
 
 Please see our publication Titled "Register Blocking: An Analytical Modelling Approach for Affine
 Loop Kernels" and http://pluto-compiler.sourceforge.net.
@@ -9,20 +9,21 @@ This package includes both the tool pluto, libpluto and they are enriched with o
 is a source-to-source transfomer meant to be run via the polycc script.
 libpluto provides a thread-safe library interface.
 
-LICENSE
+**LICENSE**
 
 Pluto and libpluto are available under the MIT LICENSE. Please see the file
 LICENSE in the top-level directory for more details.
 
 INSTALLING Register Blocking library
-  - Use a simple cmake prosidure to intall it: 
+  - Use a simple cmake prosidure to intall it:
+```
   $ cd ./rbalib/build
   $ cmake ..
   $ cmake --build .
+```
+**INSTALLING PLUTO**
 
-INSTALLING PLUTO
-
-PREREQUISITES
+**PREREQUISITES**
 
 A Linux distribution. Pluto has been tested on x86 and x86-64 machines
 running Fedora, Ubuntu, and CentOS.
@@ -52,8 +53,8 @@ Pluto includes all polyhedral libraries that it depends on. See pet/README for
 pet's pre-requisites.
 
 
-BUILDING PLUTO
-You can use the intall_tool.sh script that contain some instuctions or use the Pluto recommended procedure: 
+**BUILDING PLUTO**
+You can use the ***intall_tool.sh*** script that contain some instuctions or use the Pluto recommended procedure: 
 
 Stable release
 
@@ -121,9 +122,10 @@ We need to provide the available registers of the system. In our case, there are
   32 // vector langth
 ```
 By runing the above example using our analysis:
+```
    $ cd rbalib/build
    $ ./RB_analysis ../input_MVM
-
+```
 We can see that the minimum load/stores are with loop permutaion  ij and by applying RB to the i-loop with factor of 14. Next we will apply this transforamtion to our code.
 
 See examples/MMM for this steps:
@@ -132,10 +134,10 @@ See examples/MMM for this steps:
   you want to optimize.
 
 - Then, just run
-
+```
     $ ../../tool/pluto mvm.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[14,1]
     $ ../../inscop mvm.c mvm.pluto.c mvm.pluto.c
-
+```
   The transformation is also printed out some information and provide the  intermediate files. By usning pluto 
   we unroll the i loop (outer loop) with factor 14. The new optmised file is the 'mvm.pluto.c'.
 
