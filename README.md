@@ -98,7 +98,7 @@ for (i=0;i!=30;i++)
   for (j=0;j!=40;j++) 
     Y[i]+=A1[i][j]*X[j];
 ```
-As we can see we scalar code that has:
+As we can see the scalar code that has:
   - 3 arrays:
     - Y with substript i is a load/store array
     - A1 with ij substripts is a load array
@@ -109,10 +109,10 @@ As we can see we scalar code that has:
 
 We need to provide the available registers of the system. In our case, there are 16 registers. Since we have float arrays and no vectorization, the vector length is 32. In the case that we have vectorization for AVX512, the vector length is 512. By default, the input is float32. With this information, the wrapper will be:
 ```
-  3 // for arrays
-  1 // we have one substript
-  Y i 1 // Y array with substript i is a load/store array
-  2 // we have two substript
+  3 // 3 arrays
+  1 // we have one substript for the first array
+  Y i 1 // Y array, with substript i and 1 is identify that it is a load/store array
+  2 // we have two substript for the next array
   A1 ij 0 // A1 array with substript i,j is a load array
   1
   X j 0
@@ -139,6 +139,6 @@ See examples/MMM for this steps:
     $ ../../tool/pluto mvm.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[14,1]
     $ ../../inscop mvm.c mvm.pluto.c mvm.pluto.c
 ```
-  The transformation is also printed out some information and provide the  intermediate files. By usning pluto 
+  The transformation is also printed out some information and provide the  intermediate files from pluto. By usning pluto 
   we unroll the i loop (outer loop) with factor 14. The new optmised file is the 'mvm.pluto.c'.
 
