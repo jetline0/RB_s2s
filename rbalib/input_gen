@@ -10,3 +10,10 @@ rqsp 120 120 120 120
 25
 s
 32
+
+
+// for (r = 0; r < N; r++) 
+//   for (q = 0; q < N; q++)
+//     for (p = 0; p < N; p++) 
+//       for (s = 0; s < N; s++) 
+//          out[r][q][p]+= A[r][q][s]*C[s][p];

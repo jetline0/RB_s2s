@@ -17,7 +17,7 @@ typedef struct Array {
     // e.g. A[i][j][k] => name='A', subscript_len = 3, subscript_iter = 'ijk' 
     char name[Max_string_size];
     int subscript_len;
-    char subscript_iter[Max_loops];    
+    char subscript_iter[Max_loops + 1];    
     int L_S_status; //L_S_status = 0 if laod_only, L_S_status = 1 if load and store, L_S_status = 2 if store only. For example in "A[i]+=1;" L_S_status = 2.
 } array;
 
@@ -25,7 +25,7 @@ typedef struct Array {
 typedef struct Input_table {
     int number_of_Registers;    // Available registers of the CPU
     int number_of_Loops;       // The number of loops that the given code has
-    char loop_order[Max_loops];       // The loops order that this number_of_Loops have. For example is [i,j] or [j,i]
+    char loop_order[Max_loops + 1];       // The loops order that this number_of_Loops have. For example is [i,j] or [j,i]
     int loop_sizes[Max_loops];      //The maximum number of iterations 
     int number_of_Arrays;   // The number of arrays that the given code has
     uint64_t loop_iterations; //total number of nested loop iterations. E.g., for two nested for loops {i,j} -> {n,n}: loop_iterations = O(n²)
@@ -56,6 +56,20 @@ void swap(char *x, char *y);
 
 //Generate the Permutations
 void generatePermutations(char *loops, int size, int index, char **permutations, int *count);
+
+/**
+* @brief Generate permutations that effect Register Blocking
+* For example given an arr[i][j][k] and a code with loops ijkl.
+* The loop permutation ijk.. effect RB bacause arr can be  moved outside of a l-loop.
+* @param[in]  in_table : Pointer to the input table.
+* @return permut_array : Permutations that effect RB and also have good permutation locality
+*/
+void gen_perm_effect_RB(input_table *in_table,char **permut_array);
+
+//function given a str="ijkl" and and str2="ij". The str2 is always subset of str. 
+// I wont to store into remaining_chars the chars that are not on str. Like "kl"
+// returns the size of remaining_chars.
+int get_remaining_chars(const char* str, const char* str2, char* remaining_chars);
 
 //Calculates the common chataters of str1 and str2
 int countCommonCharacters(const char* str1, const char* str2);

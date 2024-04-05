@@ -10,7 +10,11 @@ v2 j 0
 2
 A ij 1
 2
-ij 6000 6000
+ij 60 60
 16
 j
-256
+32
+
+// for (int i = 0; i < N; i++) 
+//    for (int j = 0; j < N; j++)   
+// A[i][j] += u1[i] * v1[j] + u2[i] * v2[j];

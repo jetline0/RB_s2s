@@ -37,6 +37,16 @@ void allocations(int *RB_factors,int number_of_Loops,char **permut_array,int L_f
  */
 void SC_table_F(char *curr_loop_order, input_table *in_table, SR_table *sc_table);
 
+/**
+ * @brief Calculate the sum of permutation locality for all arrays.
+ * Given a permutation of ijk and an array[i][j] the permutation locality of this arrays is 1.
+ * Given a permutation of ijk and an array[j][i] the permutation locality of this arrays is 0 
+ * (bad strides because array is accesed columnwise). 
+ * @param[in] curr_loop_order loop permutaion.
+ * @param[in] in_table Pointer to the input_table.
+ */
+int sum_of_perm_locality(char *curr_loop_order, input_table *in_table);
+
 
 /**
  * @brief Calculates the loads and stores for each array. When we apply vectorization by usinf specific intrinsics the loads and stores are deicresed.
@@ -87,8 +97,10 @@ bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loop
  * @param[in] rb_loops Pointer to the initialised rb_loops.
  * @param[in] RB_loop  The loop(s) to apply RB.
  * @return   l_s number of load stores
+ * @return   indexes the index of each loop 
+ * @return   RB_factors the RB factor for each loop
  */
-void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char *RB_loop, uint64_t *l_s, uint64_t *ls_array);
+void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char *RB_loop, uint64_t *l_s, uint64_t *ls_array,int *indexes,int *RB_factors);
 
 /**
  * @brief Saves the current best Registers Blocking factors and loop permutaion.
@@ -96,7 +108,7 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
  * @param[in] RB_factors The current RB factors
  * @param[in] curr_loop_order: The current loop order.
  */
-void save(int r_w,RB_loops *RB_factors,char *curr_loop_order);
+void save(RB_loops *RB_factors,char *curr_loop_order);
 
 
 /**
@@ -105,7 +117,7 @@ void save(int r_w,RB_loops *RB_factors,char *curr_loop_order);
  * @param[in] RB_factors The best RB factors.
  * @param[in] curr_loop_order: The best current loop order.
  */
-void print_results(int min_r_w,RB_loops *RB_factors,char *curr_loop_order);
+void print_results();
 
 // Free a malloc arrays
 void deallocations(RB_loops *RB_factors,char **permut_array,int L_fuct, SR_table *sc_table,uint64_t *ls_array);

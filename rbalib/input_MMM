@@ -1,21 +1,34 @@
-3
-2
-C ij 1
-2
-A ik 0
+3 
+2 
+C ij 1 
+2 
+A ik 0 
 2
 B kj 0
-3
-ijk 672 672 672
+3 
+ijk 672 672 672 
 16
-j
-128
+j  
+128 
 
-//for (i=0;i!=N;i++) 
-//    for (j=0;j!=N;j++) 
-//        for (k=0;k!=N;k++) 
-//            C[i][j]+=A[i][k]*B[k][j];
-//end 
-//Number of registers = 16
-//vectorization on j 
-//avx-256
+// 3 arrays
+// first array has 2 subscripts
+// arrays C, with ij subscripts, 1 because is a load,store array
+// second array has 2 subscripts
+// arrays A, with ik subscripts, 0 because is a load array
+..
+// 3 subscripts
+..
+// 16 Hardware Registers
+// apply vectorization to the j loop
+// 128 beacuse I have avx-128 
+
+// In other words:
+    //for (i=0;i!=N;i++) 
+    //    for (j=0;j!=N;j++) 
+    //        for (k=0;k!=N;k++) 
+    //            C[i][j]+=A[i][k]*B[k][j];
+    //end 
+    //Number of registers = 16
+    //vectorization on j 
+    //avx-256

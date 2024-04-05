@@ -71,6 +71,7 @@ void swap(char *x, char *y) {
     *y = temp;
 }
 
+// Anadromi that generates all the available loop permutations
 void generatePermutations(char *loops, int size, int index, char **permutations, int *count) {
     if (index == size) {
         if (permutations[*count] == NULL) {
@@ -93,8 +94,6 @@ void generatePermutations(char *loops, int size, int index, char **permutations,
 }
 
 void permutations(char loops[],int num_loops,char **permutations) {
-    int num_permutations = Factorial(num_loops);    // Calculate the number of permutations
-
     if (permutations == NULL) {
         printf("Memory allocation failed.\n");
         exit(1);
@@ -128,6 +127,20 @@ int countCommonCharacters(const char* str1, const char* str2) {
     }
 
     return count;
+}
+
+int get_remaining_chars(const char* str, const char* str2, char*remaining_chars) {
+    int len1 = strlen(str);
+    int len2 = strlen(str2);
+    int k = 0;
+
+    for (int i = 0; i < len1; i++) {
+        if (strchr(str2, str[i]) == NULL) {
+            remaining_chars[k++] = str[i];
+        }
+    }
+    remaining_chars[k] = '\0'; // Null-terminate the string
+    return k;
 }
 
 

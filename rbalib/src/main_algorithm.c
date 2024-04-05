@@ -1,35 +1,46 @@
 #include "../inc/RB_analysis.h"
+#define DEBUG 1
+
+// Result of our methodology
+char *loop_order;
+int *RB_factors_rsl;
+char RB_loop_rsl[Max_loops+1];
+int number_of_unroll_loops_rls;
+int *result_index;
 
 void main_algorithm(input_table *in_table){
-  int i,j,L_fuct,const_part;
+  int i,j,const_part;
   uint64_t min_l_s,l_s;
   char *curr_loop_order;
-  char RB_loop[Max_loops]; // The loop(s) to apply Reg. blocking.
+  int *indexes; // indexes of the applied RB loops
+  int *RB_factors; // RB factors of each RB loop
+  char RB_loop[Max_loops+1]; // The loop(s) to apply Reg. blocking.
   char **permut_array;  // Dym. array where the loop permutations will be stored
   SR_table *sc_table;  //Dym. Scalar Replacement table.
   RB_loops *rb_loops; // Dym. array where the Reg. blocking factors will be stored for each loop. If no RB will be applied "bool unroll = 0" & RB_factor = 1. 
   uint64_t *ls_array; // Dyn. allocated array that has laods and stores for each array. 
-
-  char* str = "m";
-  char* str2 = "kij";
+  
   min_l_s = 9223372036854775807;
 
-  L_fuct = Factorial(in_table->number_of_Loops);
 
   // Data allocations TODO: Create a function that do all that!!
   ////////////////////////////// START /////////////////////////////////////////
   rb_loops = (RB_loops *) malloc((in_table->number_of_Loops)*sizeof(RB_loops));
   ls_array = (uint64_t *) malloc((in_table->number_of_Arrays)*sizeof(uint64_t));
-  permut_array = (char**)malloc(L_fuct * sizeof(char*));
+  permut_array = (char**)malloc(in_table->number_of_Arrays * sizeof(char*));
   sc_table = (SR_table *) malloc(in_table->number_of_Arrays * sizeof(SR_table));
-  for (int i = 0; i < L_fuct; i++)
-        permut_array[i] = (char*)malloc(in_table->number_of_Loops* sizeof(char));
+  for (int i = 0; i < in_table->number_of_Arrays; i++)
+        permut_array[i] = (char*)malloc((in_table->number_of_Loops+1)* sizeof(char));
+  indexes = (int *)malloc(1*(sizeof(int)));
+  result_index = (int *)malloc(1*(sizeof(int)));
+  RB_factors_rsl = (int *) malloc(1*sizeof(int));
+  RB_factors = (int *) malloc(1*sizeof(int));
   ////////////////////////////// END ////////////////////////////////////////////
 
-  permutations(in_table->loop_order,in_table->number_of_Loops,permut_array);
+  gen_perm_effect_RB(in_table,permut_array);
   init_RB_loops(in_table,rb_loops);
 
-  for (i=0; i<L_fuct; i++){// for all loop permutations
+  for (i=0; i<in_table->number_of_Arrays; i++){// for all loop permutations
     //next loop order e.g., for a loop={i,j} -> loop_oder = {i,j} or loop_oder = {j,i}
     curr_loop_order = permut_array[i];
 
@@ -44,17 +55,26 @@ void main_algorithm(input_table *in_table){
       RB_loop_F(j+1,curr_loop_order,rb_loops,RB_loop);
 
       // test diffent numbers on RB_fuctros and find the best one. Returns the register blocking factors and and load/store number
-      Best_LS_F(in_table, sc_table,rb_loops,RB_loop,&l_s,ls_array);
+      Best_LS_F(in_table, sc_table,rb_loops,RB_loop,&l_s,ls_array,indexes,RB_factors);
 
       //if better combination was found save it.
-      if (l_s < min_l_s)
+      if (l_s < min_l_s){
         min_l_s = l_s;
-        //save(l_s,rb_loops,curr_loop_order);
+        number_of_unroll_loops_rls = strlen(RB_loop);
+        memcpy(RB_factors_rsl, RB_factors, (in_table->number_of_Loops)*sizeof(RB_loops));
+        strcpy(RB_loop_rsl,RB_loop);
+        loop_order=curr_loop_order;
+        result_index= realloc(result_index, number_of_unroll_loops_rls*(sizeof(int)));
+        memcpy(result_index, indexes, sizeof(int)*number_of_unroll_loops_rls);
+      }
     }
   }
-  printf("min_l_s == %ld \n",min_l_s);
-  print_results(min_l_s,rb_loops,curr_loop_order);
-  deallocations(rb_loops,permut_array,L_fuct,sc_table,ls_array);
+  printf("RESULTS:\n\tMinimum l/s instruction found of: %ld \n",min_l_s);
+  print_results();
+  deallocations(rb_loops,permut_array,in_table->number_of_Arrays,sc_table,ls_array);
+  free(indexes);
+  free(result_index);
+  free(RB_factors_rsl);
 
 }
 
@@ -82,7 +102,7 @@ void SC_table_F(char *curr_loop_order, input_table *in_table, SR_table *sc_table
     sc_table[i].loop_iterations = loop_iterations;
     strcpy(sc_table[i].name, in_table->arrays[i].name);
     if (sc_table[i].degree)
-      printf("Info:\n\tAppling Scleral Replacement on %s with degree = %d\n",sc_table[i].name,sc_table[i].degree);
+      printf("Info:\n\tAppling Scleral Replacement on %s with degree = %d\n\n",sc_table[i].name,sc_table[i].degree);
   }
 }
 
@@ -94,7 +114,7 @@ void vect_ls_F(input_table *in_table,SR_table *sc_table,uint64_t *ls_array){
   int i;
   for (i=0;i<in_table->number_of_Arrays;i++){ // for all arrays
     ls_array[i] = 0;
-    if (in_table->arrays[i].L_S_status == 0 || (in_table->arrays[i].L_S_status == 1)) // if we laod array
+    if (in_table->arrays[i].L_S_status == 0 || (in_table->arrays[i].L_S_status == 1)){ // if we laod array
       if (sc_table[i].degree){
         if ((strchr(in_table->arrays[i].subscript_iter, in_table->vect_loop) == NULL) ){ // if the vectorised loop is not in the array's subscript
           ls_array[i] = sc_table[i].loop_iterations;     // vectorization do not benefit loads
@@ -104,13 +124,13 @@ void vect_ls_F(input_table *in_table,SR_table *sc_table,uint64_t *ls_array){
       }
       else
         ls_array[i] = in_table->loop_iterations/in_table->vect_unroll;
-
-    if (in_table->arrays[i].L_S_status == 2 || (in_table->arrays[i].L_S_status == 1)) // if we store array
+    }
+    if (in_table->arrays[i].L_S_status == 2 || (in_table->arrays[i].L_S_status == 1)){ // if we store array
       if ((strchr(in_table->arrays[i].subscript_iter, in_table->vect_loop) != NULL)) //  we use store_ps
         ls_array[i] += sc_table[i].loop_iterations/in_table->vect_unroll;
       else // we use store_ss
         ls_array[i] += sc_table[i].loop_iterations;
-
+    }
     int index = findCharacter(in_table->arrays[i].subscript_iter, in_table->vect_loop);
     if (index != -1 && index != (strlen(in_table->arrays[i].subscript_iter)-1))
         printf("Info:\n\t Array %s needs layout alteration to apply vectorization\n",in_table->arrays[i].name);
@@ -157,7 +177,9 @@ void RB_loop_F(int axi, char *loop_order,RB_loops *rb_loops, char *RB_loop){
     }
 
     RB_loop[index] = '\0';
+#ifdef DEBUG
     printf("\tAppling RB in the %s loop(s)..\n", RB_loop);
+#endif
 }
 
 bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char *RB_loop, uint64_t *l_s,uint64_t *ls_array){
@@ -227,7 +249,7 @@ bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loop
   return (registers >= 0);
 }
 
-void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char *RB_loop, uint64_t *l_s,uint64_t *ls_array){
+void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char *RB_loop, uint64_t *l_s,uint64_t *ls_array,int *indexes,int *RB_factors){
   // This function by knowing that we have RB in the RB_loop find the minimum valid l_s and RB factors.
   // valid = the registers used are less or equall to the registers of the system
   // The main idea of the code: Lets say that we wont to apply RB into 2 loops.
@@ -236,7 +258,6 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
   
     int i,j,axi_j,axi_i,k,number_of_unroll_loops,index;
     int i_size,j_size,k_size;
-    int *indexes;
     uint64_t min_ls;
     bool valid;
     int unroll_fact[Max_loops]; // This are is used as as rapper of the unroll factors. I wont at  loop_un=0 to store the k as unroll/RB factors
@@ -247,7 +268,8 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
     sizes[0] = sizes[1] = sizes[2] = sizes[3] = sizes[4] = sizes[5] = sizes[6]  = 3;
     number_of_unroll_loops = strlen(RB_loop);
     min_ls = 9223372036854775807; // max uint64_t number.
-    indexes = (int *)malloc(number_of_unroll_loops*(sizeof(int)));
+    indexes = realloc(indexes, number_of_unroll_loops*(sizeof(int)));
+    RB_factors = realloc(RB_factors, number_of_unroll_loops*(sizeof(int)));
 
     for (i=0;i<number_of_unroll_loops;i++){
       indexes[i] = findCharacter(in_table->loop_order, RB_loop[i]);
@@ -260,7 +282,7 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
     }
     //end 
     
-
+    // enumerarion to find min ls inst.
     for (int o = 2; o< sizes[0]; o++)
       for (int n = 2; n< sizes[1]; n++)
         for (int m = 2; m< sizes[2]; m++)
@@ -280,30 +302,92 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
 
                   valid = cost_functions_F(in_table,sc_table,rb_loops, RB_loop, l_s,ls_array);
                   if (valid && *l_s<min_ls){
+                    min_ls =  *l_s;
+                    for (int loop_un=0;loop_un<number_of_unroll_loops;loop_un++){
+                      RB_factors[loop_un] = rb_loops[indexes[loop_un]].RB_factor;
+                    }
+#ifdef DEBUG
                     for (int loop_un=0;loop_un<number_of_unroll_loops;loop_un++)
                       printf("%c == %d\n",RB_loop[loop_un],rb_loops[indexes[loop_un]].RB_factor);
-                    min_ls =  *l_s;
                     printf("l_s == %ld\n\n",*l_s);
+#endif
                   }
                 }
               }
             }
 
     *l_s = min_ls;
-    free(indexes);
+}
+void gen_perm_effect_RB(input_table *in_table,char **permut_array){
+
+  int L_fuct,sum_of_loc,best_perm,max_loc;
+  char **remain_permutations;
+  char tmp_perm[Max_loops + 1];
+  char* remaining_chars = (char*)malloc((strlen(in_table->loop_order) + 1) * sizeof(char));
+  
+  for (size_t i = 0; i < in_table->number_of_Arrays; i++){
+
+    // Loop permutations depend on the arrays that can be moved out of the three innermost loop(s).
+    // Initially for each array the first loops of the permutation are the same with the array's subscript  
+    strcpy(permut_array[i], in_table->arrays[i].subscript_iter);
+    int size_remain = get_remaining_chars(in_table->loop_order, permut_array[i], remaining_chars);
+
+    // Generates all the permutaions 
+    L_fuct = Factorial(size_remain);
+    remain_permutations = (char**)malloc(L_fuct * sizeof(char*));
+    for (int j = 0; j < L_fuct; j++)
+        remain_permutations[j] = (char*)malloc(in_table->number_of_Loops* sizeof(char));
+    permutations(remaining_chars,size_remain,remain_permutations);
+
+    // fing the permutation that has the maximum permutation locality
+    max_loc=0;
+    for (int j = 0; j < L_fuct; j++){
+      strcpy(tmp_perm, permut_array[i]);  // concatenate the two strings
+      strcat(tmp_perm,remain_permutations[j]);
+      sum_of_loc = sum_of_perm_locality(tmp_perm,in_table);
+      if (sum_of_loc>max_loc){ 
+        best_perm = j;
+        max_loc = sum_of_loc;
+      }
+    }
+    strcat(permut_array[i],remain_permutations[best_perm]);
+    for (int j = 0; j < L_fuct; j++)
+      free(remain_permutations[j]);
+    free(remain_permutations);
+  }
+
+  free(remaining_chars);
 }
 
-void save(int r_w,RB_loops *RB_factors,char *curr_loop_order){
-
+int sum_of_perm_locality(char *loop_perm, input_table *in_table){
+  int i,perm_it,arr_it,sum;
+  sum=0;
+  for (size_t i = 0; i < in_table->number_of_Arrays; i++){
+    int len_loop_perm = strlen(loop_perm);
+    int len_array_sub = strlen(in_table->arrays[i].subscript_iter);
+    perm_it = 0; arr_it = 0;
+    while (perm_it < len_loop_perm && arr_it < len_array_sub) {
+        if (loop_perm[perm_it] == in_table->arrays[i].subscript_iter[arr_it]) {
+            arr_it++;
+        }
+        perm_it++;
+    }
+    if (arr_it == len_array_sub) // If all array's subscripts are found in loop permutation and in the same order
+       sum++;
+  }
+  
+  return sum;
 }
 
-void print_results(int min_r_w,RB_loops *RB_factors,char *curr_loop_order){
-
+void print_results(){
+  printf("\tLoop order: %s\n",loop_order);
+  for (int loop_un=0;loop_un<number_of_unroll_loops_rls;loop_un++)
+    printf("\tRB factor for %c == %d\n",RB_loop_rsl[loop_un],RB_factors_rsl[loop_un]);
 }
 
-void deallocations(RB_loops *RB_factors,char **permut_array,int L_fuct, SR_table *sc_table,uint64_t *ls_array){
+void deallocations(RB_loops *RB_factors,char **permut_array,int number_of_Arrays, SR_table *sc_table,uint64_t *ls_array){
     // Free the dynamically allocated memory
-    for (int i = 0; i < L_fuct; i++) {
+    for (int i = 0; i < number_of_Arrays; i++) {
       free(permut_array[i]);
     }
     free(permut_array);

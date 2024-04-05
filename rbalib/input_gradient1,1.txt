@@ -10,3 +10,11 @@ bmyxd 20 128 60 60 256
 32
 d
 128
+
+
+// for (b=0; b<Batch;b++)  
+//    for ( m=0; m<ft_Map;m++)
+//       for ( y=0; y<out_he;y++)
+//          for ( x=0; x<out_wi;x++)
+//               for ( d=0; d<in_depth;d++)
+// din[b][y*stride.y][x*stride.x][d] += dout[b][y][x][m] * filter[m][d];
