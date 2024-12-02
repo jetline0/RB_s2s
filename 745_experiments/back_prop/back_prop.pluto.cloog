@@ -1,0 +1,44 @@
+# CLooG script generated automatically by PLUTO 0.11.4-1022-g5124a3c
+# language: C
+c
+
+0 6
+
+1
+M D Y X 
+
+# Number of statements
+1
+
+# S1 (filter_FP[m][d] += out[y][x][m] * in_FP[y][x][d];)
+12 10
+1 1 0 0 0 0 0 0 0 0 
+1 -1 0 0 0 1 0 0 0 -1 
+1 0 0 0 0 1 0 0 0 -1 
+1 0 1 0 0 0 0 0 0 0 
+1 0 -1 0 0 0 1 0 0 -1 
+1 0 0 0 0 0 1 0 0 -1 
+1 0 0 1 0 0 0 0 0 0 
+1 0 0 -1 0 0 0 1 0 -1 
+1 0 0 0 0 0 0 1 0 -1 
+1 0 0 0 1 0 0 0 0 0 
+1 0 0 0 -1 0 0 0 1 -1 
+1 0 0 0 0 0 0 0 1 -1 
+0 0 0
+
+# we want cloog to set the iterator names
+0
+
+# Number of scattering functions
+1
+
+# T(S1)
+4 14
+0 1 0 0 0 -1 0 0 0 0 0 0 0 0 
+0 0 1 0 0 0 -1 0 0 0 0 0 0 0 
+0 0 0 1 0 0 0 -1 0 0 0 0 0 0 
+0 0 0 0 1 0 0 0 -1 0 0 0 0 0 
+
+# we will set the scattering dimension names
+4
+t1 t2 t3 t4 

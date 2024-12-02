@@ -1,0 +1,20 @@
+3
+2
+in_FP yxd 1
+4
+filter_FP md 0
+4
+out yxm 0
+4
+myxd 128 60 60 256
+32
+d
+128
+
+
+// gradient descent
+//    for ( m=0; m<ft_Map;m++)
+//       for ( y=0; y<out_he;y++)
+//          for ( x=0; x<out_wi;x++)
+//               for ( d=0; d<in_depth;d++)
+//                    din[y][x][d] += dout[y][x][m] * filter[m][d];

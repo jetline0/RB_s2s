@@ -1,0 +1,19 @@
+3
+2
+in_FP yxd 0
+4
+filter_FP md 1
+4
+out yxm 0
+4
+myxd 128 60 60 256
+16
+d
+256
+
+// backprop
+//    for (m = 0; m < 128; m++)
+//        for (y = 0; y < 60; y++)
+//            for (x = 0; x < 60; x++)
+//                for (d = 0; d < 256; d++)
+//                    filter_FP[m][d] += out[y][x][m] * in_FP[y][x][d];

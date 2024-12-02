@@ -1,0 +1,21 @@
+3
+3
+out yxm 1
+3
+in yxd 0
+2
+filter md 0
+4
+myxd 128 60 60 256
+11
+k
+32
+
+
+
+
+//      for (int m = 0; m < M; m++)
+//          for (int y = 0; y < Y; y++)
+//              for (int x = 0; x < X; x++)
+//                  for (int d = 0; d < D; d++)
+//                      out[y][x][m] += in[y][x][d] * filter[m][d];
