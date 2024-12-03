@@ -30,7 +30,6 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
         
         # iterate over all transformation arguments
         for aname, rhs, line_no in transf_args:
-
             # evaluate the RHS expression
             try:
                 rhs = eval(rhs, perf_params)
@@ -44,7 +43,7 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
                 dtype = (rhs, line_no)
 
             # prefix name for scalars
-            if aname in PREFIX:
+            elif aname in PREFIX:
                 prefix = (rhs, line_no)
 
             # unknown argument name
