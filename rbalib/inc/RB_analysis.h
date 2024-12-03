@@ -9,6 +9,8 @@ typedef struct Scleral_Replacement_table{
     char name[Max_string_size]; //name of the array
     int degree; //load elimination degree of the SR transformation
     uint64_t loop_iterations; //total number of nested loop iterations. For equal loop sizes = N, the loop_iterations = n^(number_of_for_loops - degree) 
+    uint64_t reg_per_ref;
+    bool overwrite;
 } SR_table;
 
 // Describes if the loop "loop_name" will be unrolled in order to apply Register Blocking.

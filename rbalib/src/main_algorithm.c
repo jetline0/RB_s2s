@@ -1,4 +1,6 @@
 #include "../inc/RB_analysis.h"
+#define true 1
+#define false 0
 #define DEBUG 1
 
 // Result of our methodology
@@ -8,6 +10,31 @@ char RB_loop_rsl[Max_loops+1];
 int number_of_unroll_loops_rls;
 int *result_index;
 
+void print_sctable_array(SR_table* sc_table) {
+    // Print the content of a single SR_table entry
+    printf("Name: %s\n", sc_table->name);
+    printf("Degree: %d\n", sc_table->degree);
+    printf("Loop Iterations: %lu\n", sc_table->loop_iterations);
+    printf("Registers per Reference: %lu\n", sc_table->reg_per_ref);
+    printf("Overwrite: %d\n", sc_table->overwrite);
+    printf("\n"); // Add a newline for readability
+}
+
+// n is number of arrays
+void print_sctable(SR_table* sc_table, int n) {
+    for (int i = 0; i < n; i++) {
+        print_sctable_array(&sc_table[i]);
+    }
+}
+
+// n is number of arrays
+void reset_reg_per_ref_and_overwrite(SR_table* sc_table, int n) {
+    for (int i = 0; i < n; i++) {
+        sc_table[i].reg_per_ref = 0;
+        sc_table[i].overwrite = false;
+    }
+}
+
 void main_algorithm(input_table *in_table){
   int i,j,const_part;
   uint64_t min_l_s,l_s;
@@ -16,6 +43,7 @@ void main_algorithm(input_table *in_table){
   int *RB_factors; // RB factors of each RB loop
   char RB_loop[Max_loops+1]; // The loop(s) to apply Reg. blocking.
   char **permut_array;  // Dym. array where the loop permutations will be stored
+  SR_table *best_sc_table;  //Dym. Scalar Replacement table for best LS
   SR_table *sc_table;  //Dym. Scalar Replacement table.
   RB_loops *rb_loops; // Dym. array where the Reg. blocking factors will be stored for each loop. If no RB will be applied "bool unroll = 0" & RB_factor = 1. 
   uint64_t *ls_array; // Dyn. allocated array that has laods and stores for each array. 
@@ -28,6 +56,7 @@ void main_algorithm(input_table *in_table){
   rb_loops = (RB_loops *) malloc((in_table->number_of_Loops)*sizeof(RB_loops));
   ls_array = (uint64_t *) malloc((in_table->number_of_Arrays)*sizeof(uint64_t));
   permut_array = (char**)malloc(in_table->number_of_Arrays * sizeof(char*));
+  best_sc_table = (SR_table *) malloc(in_table->number_of_Arrays * sizeof(SR_table));
   sc_table = (SR_table *) malloc(in_table->number_of_Arrays * sizeof(SR_table));
   for (int i = 0; i < in_table->number_of_Arrays; i++)
         permut_array[i] = (char*)malloc((in_table->number_of_Loops+1)* sizeof(char));
@@ -66,11 +95,16 @@ void main_algorithm(input_table *in_table){
         loop_order=curr_loop_order;
         result_index= realloc(result_index, number_of_unroll_loops_rls*(sizeof(int)));
         memcpy(result_index, indexes, sizeof(int)*number_of_unroll_loops_rls);
+        // copy sc_table into best_sc_table
+        memcpy(best_sc_table, sc_table, in_table->number_of_Arrays * sizeof(SR_table));
       }
+      // reset sc_table's reg_per_ref
+      reset_reg_per_ref_and_overwrite(sc_table, in_table->number_of_Arrays);
     }
   }
   printf("RESULTS:\n\tMinimum l/s instruction found of: %ld \n",min_l_s);
   print_results();
+  print_sctable(best_sc_table, in_table->number_of_Arrays);
   deallocations(rb_loops,permut_array,in_table->number_of_Arrays,sc_table,ls_array);
   free(indexes);
   free(result_index);
@@ -101,6 +135,7 @@ void SC_table_F(char *curr_loop_order, input_table *in_table, SR_table *sc_table
     sc_table[i].degree = degree;
     sc_table[i].loop_iterations = loop_iterations;
     strcpy(sc_table[i].name, in_table->arrays[i].name);
+    sc_table[i].reg_per_ref = 0;
     if (sc_table[i].degree)
       printf("Info:\n\tAppling Scleral Replacement on %s with degree = %d\n\n",sc_table[i].name,sc_table[i].degree);
   }
@@ -187,12 +222,13 @@ bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loop
   // • Calculates the registers needed for appling Register Blocking.
   //    If the needed registers are more than the system can provide it returns 0 else 1
   // • Calculates loads and stores aka., array acceses and updates the l_s values.
-  int common_chars,fact_mul,l_s_mul,max_rb_factor,registers,registers_tmp;
+  int common_chars,fact_mul,l_s_mul,max_reg, max_it, registers,registers_tmp;
   uint64_t l_s_tmp;
 
   *l_s=0;
   registers = 0;
-  max_rb_factor = 0; // maximum  RB factor that is used
+  max_reg = 0; // maximum  RB factor that is used
+  max_it = -1;
 
   for(int i = 0; i<in_table->number_of_Arrays;i++){
     int sr_registers = 1; // Registers needed if the i array is scalar replaced
@@ -206,16 +242,19 @@ bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loop
           sr_registers = sr_registers*rb_loops[j].RB_factor;
         }
       }
+      sc_table[i].reg_per_ref = sr_registers;
       registers += sr_registers;
       *l_s +=  ls_array[i]; 
     } 
     else {
       common_chars = countCommonCharacters(in_table->arrays[i].subscript_iter,RB_loop);
       if (common_chars == strlen(RB_loop)){ // Array is not reused. Register blocking is no beneficial for this array
+        sc_table[i].reg_per_ref = 1;
         registers +=1;
         *l_s += ls_array[i]; // Accesses of this array did not change. Before I had e.g., N^6 now I also have N^6 accesses.
       }
       else if (common_chars == 0){ // if array is reused and no dependencies were detected
+        sc_table[i].reg_per_ref = 1;
         registers +=1;
         fact_mul = 1;
         for (int j = 0; j < in_table->number_of_Loops; j++)
@@ -236,15 +275,22 @@ bool cost_functions_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loop
               l_s_tmp = l_s_tmp/rb_loops[j].RB_factor; //eg., l_s += n^6/(unroll_fact_i*unroll_fact_j) because, arrays[i] ∉ {i,j} and I apply RB to {i,j,k}
           }
         }
-        if (max_rb_factor < registers_tmp)  // Finds the the biggest registers needed for and array removes it when the for loops end
-          max_rb_factor = registers_tmp;
+        if (max_reg< registers_tmp) {// Finds the the biggest registers needed for and array removes it when the for loops end
+          max_reg = registers_tmp;
+          max_it = i;
+        }
         *l_s +=  l_s_tmp;
+        sc_table[i].reg_per_ref = registers_tmp;
         registers += registers_tmp;
       }
     }
   }
-  if (max_rb_factor) // max_rb_factor was updated  
-    registers = registers - max_rb_factor + 1;
+  if (max_reg) // max_reg was updated  
+    registers = registers - max_reg + 1;
+  if (max_it != -1) {
+    sc_table[max_it].overwrite = true;
+    sc_table[max_it].reg_per_ref = 1;
+  }
   registers = in_table->number_of_Registers - registers;
   return (registers >= 0);
 }
@@ -262,6 +308,7 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
     bool valid;
     int unroll_fact[Max_loops]; // This are is used as as rapper of the unroll factors. I wont at  loop_un=0 to store the k as unroll/RB factors
     int sizes[Max_loops]; // The sizes that the 7 for loops will go. Initially are 3 in order not to make any iteration.
+    SR_table* best_sc_table;
     
     //init
       //start
@@ -270,6 +317,7 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
     min_ls = 9223372036854775807; // max uint64_t number.
     indexes = realloc(indexes, number_of_unroll_loops*(sizeof(int)));
     RB_factors = realloc(RB_factors, number_of_unroll_loops*(sizeof(int)));
+    best_sc_table = (SR_table *) malloc(in_table->number_of_Arrays * sizeof(SR_table));
 
     for (i=0;i<number_of_unroll_loops;i++){
       indexes[i] = findCharacter(in_table->loop_order, RB_loop[i]);
@@ -306,6 +354,7 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
                     for (int loop_un=0;loop_un<number_of_unroll_loops;loop_un++){
                       RB_factors[loop_un] = rb_loops[indexes[loop_un]].RB_factor;
                     }
+                    memcpy(best_sc_table, sc_table, in_table->number_of_Arrays * sizeof(SR_table));
 #ifdef DEBUG
                     for (int loop_un=0;loop_un<number_of_unroll_loops;loop_un++)
                       printf("%c == %d\n",RB_loop[loop_un],rb_loops[indexes[loop_un]].RB_factor);
@@ -315,7 +364,8 @@ void Best_LS_F(input_table *in_table,SR_table *sc_table,RB_loops *rb_loops, char
                 }
               }
             }
-
+    
+    memcpy(sc_table, best_sc_table, in_table->number_of_Arrays * sizeof(SR_table));
     *l_s = min_ls;
 }
 void gen_perm_effect_RB(input_table *in_table,char **permut_array){
