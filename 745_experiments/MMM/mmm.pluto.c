@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 	    printf("\nINcorrect Result\n");
 
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-  	printf("%llu\n", (long long unsigned int) diff);
+        printf("Execution time: %llu ns\n", (long long unsigned int)diff);
 
 	
 	_mm_free(C);

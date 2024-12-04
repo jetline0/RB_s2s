@@ -56,35 +56,22 @@ void gradient_descent() {
   int t1, t2, t3, t4;
  register int lbv, ubv;
 if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
-  for (t1=0;t1<=Y-1-4;t1+=5) {
+  for (t1=0;t1<=Y-1-3;t1+=4) {
     for (t2=0;t2<=X-1;t2++) {
-      for (t3=0;t3<=D-1-4;t3+=5) {
+      for (t3=0;t3<=D-1-2;t3+=3) {
         for (t4=0;t4<=M-1;t4++) {
           in[t1][t2][t3] += out[t1][t2][t4] * filter[t4][t3];;
           in[(t1+1)][t2][t3] += out[(t1+1)][t2][t4] * filter[t4][t3];;
           in[(t1+2)][t2][t3] += out[(t1+2)][t2][t4] * filter[t4][t3];;
           in[(t1+3)][t2][t3] += out[(t1+3)][t2][t4] * filter[t4][t3];;
-          in[(t1+4)][t2][t3] += out[(t1+4)][t2][t4] * filter[t4][t3];;
           in[t1][t2][(t3+1)] += out[t1][t2][t4] * filter[t4][(t3+1)];;
           in[(t1+1)][t2][(t3+1)] += out[(t1+1)][t2][t4] * filter[t4][(t3+1)];;
           in[(t1+2)][t2][(t3+1)] += out[(t1+2)][t2][t4] * filter[t4][(t3+1)];;
           in[(t1+3)][t2][(t3+1)] += out[(t1+3)][t2][t4] * filter[t4][(t3+1)];;
-          in[(t1+4)][t2][(t3+1)] += out[(t1+4)][t2][t4] * filter[t4][(t3+1)];;
           in[t1][t2][(t3+2)] += out[t1][t2][t4] * filter[t4][(t3+2)];;
           in[(t1+1)][t2][(t3+2)] += out[(t1+1)][t2][t4] * filter[t4][(t3+2)];;
           in[(t1+2)][t2][(t3+2)] += out[(t1+2)][t2][t4] * filter[t4][(t3+2)];;
           in[(t1+3)][t2][(t3+2)] += out[(t1+3)][t2][t4] * filter[t4][(t3+2)];;
-          in[(t1+4)][t2][(t3+2)] += out[(t1+4)][t2][t4] * filter[t4][(t3+2)];;
-          in[t1][t2][(t3+3)] += out[t1][t2][t4] * filter[t4][(t3+3)];;
-          in[(t1+1)][t2][(t3+3)] += out[(t1+1)][t2][t4] * filter[t4][(t3+3)];;
-          in[(t1+2)][t2][(t3+3)] += out[(t1+2)][t2][t4] * filter[t4][(t3+3)];;
-          in[(t1+3)][t2][(t3+3)] += out[(t1+3)][t2][t4] * filter[t4][(t3+3)];;
-          in[(t1+4)][t2][(t3+3)] += out[(t1+4)][t2][t4] * filter[t4][(t3+3)];;
-          in[t1][t2][(t3+4)] += out[t1][t2][t4] * filter[t4][(t3+4)];;
-          in[(t1+1)][t2][(t3+4)] += out[(t1+1)][t2][t4] * filter[t4][(t3+4)];;
-          in[(t1+2)][t2][(t3+4)] += out[(t1+2)][t2][t4] * filter[t4][(t3+4)];;
-          in[(t1+3)][t2][(t3+4)] += out[(t1+3)][t2][t4] * filter[t4][(t3+4)];;
-          in[(t1+4)][t2][(t3+4)] += out[(t1+4)][t2][t4] * filter[t4][(t3+4)];;
         }
       }
       for (;t3<=D-1;t3++) {
@@ -93,7 +80,6 @@ if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
           in[(t1+1)][t2][t3] += out[(t1+1)][t2][t4] * filter[t4][t3];;
           in[(t1+2)][t2][t3] += out[(t1+2)][t2][t4] * filter[t4][t3];;
           in[(t1+3)][t2][t3] += out[(t1+3)][t2][t4] * filter[t4][t3];;
-          in[(t1+4)][t2][t3] += out[(t1+4)][t2][t4] * filter[t4][t3];;
         }
       }
     }
@@ -120,10 +106,10 @@ unsigned short int equal(float const a, float const b) {
 
 unsigned short int Compare_gradient_descent() {
         //flops = ??
-        for (int m = 0; m < M; m++)
-            for (int y = 0; y < Y; y++)
-                for (int x = 0; x < X; x++)
-                    for (int d = 0; d < D; d++)
+        for (int y = 0; y < Y; y++)
+            for (int x = 0; x < X; x++)
+                for (int d = 0; d < D; d++)
+                    for (int m = 0; m < M; m++)
                         test[y][x][d] += out[y][x][m] * filter[m][d];
 
         for (int y = 0; y < Y; y++)

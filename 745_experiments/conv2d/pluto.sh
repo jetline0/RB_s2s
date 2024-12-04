@@ -10,7 +10,7 @@ if [ "$1" == "find_rb" ]; then
 elif [ "$1" == "unroll_jam" ]; then
   echo "Unroll-jamming the loop..."
   
-  ../../tool/pluto conv2d.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[4,1,2,1]
+  ../../tool/pluto conv2d.c --nointratileopt --nodiamond-tile --noparallel --notile --noprevector --ufactors=[4,1,3,1]
   ../../inscop conv2d.c conv2d.pluto.c conv2d.pluto.c
   cp conv2d.pluto.c conv2d.pluto.orio.c
   cp conv2d.pluto.c conv2d.pluto.alg1.c
@@ -23,6 +23,21 @@ elif [ "$1" == "apply_orio" ]; then
   ../../orio-0.1.0/orcc -v conv2d.pluto.alg1.c
 
 
+elif [ "$1" == "compile-o1" ]; then
+  # Run the second half of the commands
+  echo "Compiling..."
+  
+  VECTORIZE_FLAG=""
+  if [ "$DO_NOT_VECTORIZE" = true ]; then
+    VECTORIZE_FLAG="-fno-tree-vectorize"
+  fi
+
+  gcc conv2d.c -o no_opt1 -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc conv2d.pluto.c -o unroll_and_jam1 -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc _conv2d.pluto.orio.c -o orio_sr1 -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc _conv2d.pluto.alg1.c -o alg1_sr1 -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+
+
 elif [ "$1" == "compile" ]; then
   # Run the second half of the commands
   echo "Compiling..."
@@ -32,10 +47,10 @@ elif [ "$1" == "compile" ]; then
     VECTORIZE_FLAG="-fno-tree-vectorize"
   fi
 
-  gcc conv2d.c -o no_opt -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
-  gcc conv2d.pluto.c -o unroll_and_jam -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
-  gcc _conv2d.pluto.orio.c -o orio_sr  -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
-  gcc _conv2d.pluto.alg1.c -o alg1_sr -O1 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc conv2d.c -o no_opt2 -O2 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc conv2d.pluto.c -o unroll_and_jam2 -O2 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc _conv2d.pluto.orio.c -o orio_sr2  -O2 -g -D_GNU_SOURCE $VECTORIZE_FLAG
+  gcc _conv2d.pluto.alg1.c -o alg1_sr2 -O2 -g -D_GNU_SOURCE $VECTORIZE_FLAG
 
 elif [ "$1" == "run" ]; then
   # List of executable names to run

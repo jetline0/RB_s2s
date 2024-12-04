@@ -1,15 +1,15 @@
 3
+3
+in yxd 1
 2
-in_FP yxd 1
-4
 filter_FP md 0
-4
+3
 out yxm 0
 4
 myxd 128 60 60 256
+16
+m
 32
-d
-128
 
 
 // gradient descent

@@ -7,8 +7,8 @@ in yxd 0
 filter md 0
 4
 myxd 128 60 60 256
-11
-k
+16
+d
 32
 
 
@@ -19,3 +19,23 @@ k
 //              for (int x = 0; x < X; x++)
 //                  for (int d = 0; d < D; d++)
 //                      out[y][x][m] += in[y][x][d] * filter[m][d];
+
+
+//      for (int m = 0; m < M; m+=2)
+//          for (int y = 0; y < Y; y++)
+//              for (int x = 0; x < X; x+=3) {
+//                  out00 = out[y][x][m]; out10 = out[y][x+1][m]; ....
+//                  for (int d = 0; d < D; d++) {
+//                      in0 = in[y][x][d]; in1 = ...
+//                      filter0 = filter[m][d]; filter1 = filter[m+1][d];
+//                      // m = 0
+//                      out00 += in[y][x][d] * filter[m][d];
+//                      out10 += in[y][x+1][d] * filter[m][d];
+//                      out20 += in[y][x+2][d] * filter[m][d];
+//                      // m = 1
+//                      out01 += in[y][x][d] * filter[m+1][d];
+//                      out11 += in[y][x+1][d] * filter[m+1][d];
+//                      out21 += in[y][x+2][d] * filter[m+1][d];
+//                  }
+//                  out[y][x][m] = out00; out[y][x+1][m] = out10; ....
+//              }

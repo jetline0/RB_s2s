@@ -72,10 +72,10 @@ unsigned short int equal(float const a, float const b) {
 
 unsigned short int Compare_gradient_descent() {
         //flops = ??
-        for (int m = 0; m < M; m++)
-            for (int y = 0; y < Y; y++)
-                for (int x = 0; x < X; x++)
-                    for (int d = 0; d < D; d++)
+        for (int y = 0; y < Y; y++)
+            for (int x = 0; x < X; x++)
+                for (int d = 0; d < D; d++)
+                    for (int m = 0; m < M; m++)
                         test[y][x][d] += out[y][x][m] * filter[m][d];
 
         for (int y = 0; y < Y; y++)

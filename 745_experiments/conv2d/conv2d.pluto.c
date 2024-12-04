@@ -73,7 +73,7 @@ void conv2d_default(){
 if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
   for (t1=0;t1<=Y-1-3;t1+=4) {
     for (t2=0;t2<=X-1;t2++) {
-      for (t3=0;t3<=M-1-1;t3+=2) {
+      for (t3=0;t3<=M-1-2;t3+=3) {
         for (t4=0;t4<=D-1;t4++) {
           out[t1][t2][t3] += in[t1][t2][t4] * filter[t3][t4];;
           out[(t1+1)][t2][t3] += in[(t1+1)][t2][t4] * filter[t3][t4];;
@@ -83,6 +83,10 @@ if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
           out[(t1+1)][t2][(t3+1)] += in[(t1+1)][t2][t4] * filter[(t3+1)][t4];;
           out[(t1+2)][t2][(t3+1)] += in[(t1+2)][t2][t4] * filter[(t3+1)][t4];;
           out[(t1+3)][t2][(t3+1)] += in[(t1+3)][t2][t4] * filter[(t3+1)][t4];;
+          out[t1][t2][(t3+2)] += in[t1][t2][t4] * filter[(t3+2)][t4];;
+          out[(t1+1)][t2][(t3+2)] += in[(t1+1)][t2][t4] * filter[(t3+2)][t4];;
+          out[(t1+2)][t2][(t3+2)] += in[(t1+2)][t2][t4] * filter[(t3+2)][t4];;
+          out[(t1+3)][t2][(t3+2)] += in[(t1+3)][t2][t4] * filter[(t3+2)][t4];;
         }
       }
       for (;t3<=M-1;t3++) {
@@ -161,7 +165,7 @@ int main(int argc, char **argv) {
 	    printf("\nINcorrect Result\n");
 
 	diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-  	printf("%llu\n", (long long unsigned int) diff);
+        printf("Execution time: %llu ns\n", (long long unsigned int)diff);
 
 	
 	_mm_free(out);
