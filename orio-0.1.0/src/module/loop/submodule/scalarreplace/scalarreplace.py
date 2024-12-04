@@ -4,6 +4,7 @@
 
 import sys
 import module.loop.submodule.submodule, transformator
+import transformator_arr_overwrite as transformator_ao
 
 #---------------------------------------------------------------------
 
@@ -23,10 +24,12 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
         # all expected argument names
         DTYPE = 'dtype'
         PREFIX = 'prefix'
+        OVERWRITE_ARR = 'overwrite_arr'
 
         # all expected transformation arguments
         dtype = None
         prefix = None
+        overwrite_arr = None
         
         # iterate over all transformation arguments
         for aname, rhs, line_no in transf_args:
@@ -46,20 +49,26 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
             elif aname in PREFIX:
                 prefix = (rhs, line_no)
 
+            # name of array (enables Theologos Algorithm 1 transform instead of
+            # default transform)
+            # IGNORES PREFIX NAMING CONVENTIONS
+            elif aname in OVERWRITE_ARR:
+                overwrite_arr = (rhs, line_no)
+
             # unknown argument name
             else:
                 print 'error:%s: unrecognized transformation argument: "%s"' % (line_no, aname)
                 sys.exit(1)
 
         # check semantics of the transformation arguments
-        dtype, prefix = self.checkTransfArgs(dtype, prefix) 
+        dtype, prefix, overwrite_arr = self.checkTransfArgs(dtype, prefix, overwrite_arr) 
 
         # return information about the transformation arguments
-        return (dtype, prefix)
+        return (dtype, prefix, overwrite_arr)
 
     #-----------------------------------------------------------------
 
-    def checkTransfArgs(self, dtype, prefix):
+    def checkTransfArgs(self, dtype, prefix, overwrite_arr):
         '''Check the semantics of the given transformation arguments'''
                 
         # evaluate the data type
@@ -78,8 +87,19 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
                 sys.exit(1)
             prefix = rhs
             
+        # evaluate the name of the array that will have 1 register that will be
+        # overwritten to each time the array is referenced (regardless of subscript)
+        if overwrite_arr != None:
+            rhs, line_no = overwrite_arr
+            if rhs != None and not isinstance(rhs, str):
+                print 'error:%s: the name of the overwritten array must be a string: %s' % (line_no, rhs)
+                sys.exit(1)
+            if prefix:
+                print 'warning: prefix argument to ScalarReplace will be ignored as overwrite_arr argument is passed in'
+            overwrite_arr = rhs
+
         # return information about the transformation arguments
-        return (dtype, prefix)
+        return (dtype, prefix, overwrite_arr)
 
     #-----------------------------------------------------------------
 
@@ -95,14 +115,29 @@ class ScalarReplace(module.loop.submodule.submodule.SubModule):
     
     #-----------------------------------------------------------------
 
+    def replaceScalarsOverwrite(self, dtype, overwrite_arr, stmt):
+        '''To apply scalar replacement transformation'''
+        
+        # perform the scalar replacement transformation
+        t = transformator_ao.Transformator(dtype, overwrite_arr, stmt)
+        transformed_stmt = t.transform()
+        
+        # return the transformed statement
+        return transformed_stmt
+    
+    #-----------------------------------------------------------------
+
     def transform(self):
         '''To perform code transformations'''
 
         # read all transformation arguments
-        dtype, prefix = self.readTransfArgs(self.perf_params, self.transf_args)
+        dtype, prefix, overwrite_arr = self.readTransfArgs(self.perf_params, self.transf_args)
 
-        # perform the bound replacement transformation
-        transformed_stmt = self.replaceScalars(dtype, prefix, self.stmt)
+        if overwrite_arr != None:
+            transformed_stmt = self.replaceScalarsOverwrite(dtype, overwrite_arr, self.stmt)
+        else:
+            # perform the bound replacement transformation (Orio)
+            transformed_stmt = self.replaceScalars(dtype, prefix, self.stmt)
 
         # return the transformed statement
         return transformed_stmt

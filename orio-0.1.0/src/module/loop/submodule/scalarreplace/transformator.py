@@ -13,6 +13,7 @@ class Transformator:
     def __init__(self, dtype, prefix, stmt):
         '''To instantiate a code transformator object'''
 
+        
         self.dtype = 'double'
         self.prefix = 'scv_'
         if dtype != None:
