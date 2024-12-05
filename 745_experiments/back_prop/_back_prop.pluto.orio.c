@@ -138,29 +138,17 @@ if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
             scv_6=in_FP[t3][t4][(t2+2)];
             scv_7=out[t3][t4][t1];
             scv_15=scv_15+scv_7*scv_5;
-            ;
             scv_17=scv_17+scv_2*scv_5;
-            ;
             scv_8=scv_8+scv_4*scv_5;
-            ;
             scv_12=scv_12+scv_1*scv_5;
-            ;
             scv_14=scv_14+scv_7*scv_3;
-            ;
             scv_16=scv_16+scv_2*scv_3;
-            ;
             scv_9=scv_9+scv_4*scv_3;
-            ;
             scv_11=scv_11+scv_1*scv_3;
-            ;
             scv_18=scv_18+scv_7*scv_6;
-            ;
             scv_10=scv_10+scv_2*scv_6;
-            ;
             scv_13=scv_13+scv_4*scv_6;
-            ;
             scv_19=scv_19+scv_1*scv_6;
-            ;
           }
         }
         filter_FP[(t1+2)][t2]=scv_8;
@@ -187,13 +175,9 @@ if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
             float scv_20;
             scv_20=in_FP[t3][t4][t2];
             scv_24=scv_24+out[t3][t4][t1]*scv_20;
-            ;
             scv_23=scv_23+out[t3][t4][(t1+1)]*scv_20;
-            ;
             scv_22=scv_22+out[t3][t4][(t1+2)]*scv_20;
-            ;
             scv_21=scv_21+out[t3][t4][(t1+3)]*scv_20;
-            ;
           }
         }
         filter_FP[(t1+3)][t2]=scv_21;
@@ -209,7 +193,6 @@ if ((D >= 1) && (M >= 1) && (X >= 1) && (Y >= 1)) {
         for (t3=0; t3<=Y-1; t3++ ) {
           for (t4=0; t4<=X-1; t4++ ) {
             scv_25=scv_25+out[t3][t4][t1]*in_FP[t3][t4][t2];
-            ;
           }
         }
         filter_FP[t1][t2]=scv_25;
